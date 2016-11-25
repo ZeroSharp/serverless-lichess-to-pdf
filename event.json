@@ -1,3 +1,6 @@
 {
-  "gameid": "Xp9MOs3d"
+  "pathParameters" :
+  {
+    "gameid" : "Xp9MOs3d"
+  }
 }

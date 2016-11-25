@@ -30,7 +30,7 @@
     "IamPolicyLambdaExecution": {
       "Type": "AWS::IAM::Policy",
       "Properties": {
-        "PolicyName": "dev-serverlessLichessToPdf-lambda",
+        "PolicyName": "dev-serverless-lichess-to-pdf-lambda",
         "PolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
@@ -48,6 +48,18 @@
                 "logs:PutLogEvents"
               ],
               "Resource": "arn:aws:logs:eu-west-1:*:*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:ListBucket",
+                "s3:PutObject",
+                "s3:PutObjectAcl"
+              ],
+              "Resource": [
+                "arn:aws:s3:::serverless-lichess-to-pdf.dev",
+                "arn:aws:s3:::serverless-lichess-to-pdf.dev/*"
+              ]
             }
           ]
         },
@@ -65,9 +77,9 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/serverlessLichessToPdf/dev/1479079947023-2016-11-13T23:32:27.023Z/serverlessLichessToPdf.zip"
+          "S3Key": "serverless/serverless-lichess-to-pdf/dev/1480115565777-2016-11-25T23:12:45.777Z/serverless-lichess-to-pdf.zip"
         },
-        "FunctionName": "serverlessLichessToPdf-dev-exportToPdf",
+        "FunctionName": "serverless-lichess-to-pdf-dev-exportToPdf",
         "Handler": "handler.exportToPdf",
         "MemorySize": 1024,
         "Role": {
@@ -83,19 +95,7 @@
     "ApiGatewayRestApi": {
       "Type": "AWS::ApiGateway::RestApi",
       "Properties": {
-        "Name": "dev-serverlessLichessToPdf"
-      }
-    },
-    "ApiGatewayResourceExportGameidVar": {
-      "Type": "AWS::ApiGateway::Resource",
-      "Properties": {
-        "ParentId": {
-          "Ref": "ApiGatewayResourceExport"
-        },
-        "PathPart": "{gameid}",
-        "RestApiId": {
-          "Ref": "ApiGatewayRestApi"
-        }
+        "Name": "dev-serverless-lichess-to-pdf"
       }
     },
     "ApiGatewayResourceExport": {
@@ -113,82 +113,33 @@
         }
       }
     },
+    "ApiGatewayResourceExportGameidVar": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Ref": "ApiGatewayResourceExport"
+        },
+        "PathPart": "{gameid}",
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        }
+      }
+    },
     "ApiGatewayMethodExportGameidVarGet": {
       "Type": "AWS::ApiGateway::Method",
       "Properties": {
-        "AuthorizationType": "NONE",
         "HttpMethod": "GET",
-        "MethodResponses": [
-          {
-            "ResponseParameters": {
-              "method.response.header.Content-Type": true
-            },
-            "ResponseModels": {},
-            "StatusCode": 200
-          },
-          {
-            "ResponseParameters": {
-              "method.response.header.Content-Type": true
-            },
-            "ResponseModels": {},
-            "StatusCode": 400
-          },
-          {
-            "ResponseParameters": {
-              "method.response.header.Content-Type": true
-            },
-            "ResponseModels": {},
-            "StatusCode": 401
-          },
-          {
-            "ResponseParameters": {
-              "method.response.header.Content-Type": true
-            },
-            "ResponseModels": {},
-            "StatusCode": 403
-          },
-          {
-            "ResponseParameters": {
-              "method.response.header.Content-Type": true
-            },
-            "ResponseModels": {},
-            "StatusCode": 404
-          },
-          {
-            "ResponseParameters": {
-              "method.response.header.Content-Type": true
-            },
-            "ResponseModels": {},
-            "StatusCode": 422
-          },
-          {
-            "ResponseParameters": {
-              "method.response.header.Content-Type": true
-            },
-            "ResponseModels": {},
-            "StatusCode": 500
-          },
-          {
-            "ResponseParameters": {
-              "method.response.header.Content-Type": true
-            },
-            "ResponseModels": {},
-            "StatusCode": 502
-          },
-          {
-            "ResponseParameters": {
-              "method.response.header.Content-Type": true
-            },
-            "ResponseModels": {},
-            "StatusCode": 504
-          }
-        ],
-        "RequestParameters": {
-          "method.request.path.gameid": true
+        "RequestParameters": {},
+        "ResourceId": {
+          "Ref": "ApiGatewayResourceExportGameidVar"
         },
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        },
+        "AuthorizationType": "NONE",
         "Integration": {
           "IntegrationHttpMethod": "POST",
-          "Type": "AWS",
+          "Type": "AWS_PROXY",
           "Uri": {
             "Fn::Join": [
               "",
@@ -207,96 +158,12 @@
                 "/invocations"
               ]
             ]
-          },
-          "RequestTemplates": {
-            "application/json": "\n            #define( $loop )\n              {\n              #foreach($key in $map.keySet())\n                  \"$util.escapeJavaScript($key)\":\n                    \"$util.escapeJavaScript($map.get($key))\"\n                    #if( $foreach.hasNext ) , #end\n              #end\n              }\n            #end\n\n            {\n              \"body\": $input.json(\"$\"),\n              \"method\": \"$context.httpMethod\",\n              \"principalId\": \"$context.authorizer.principalId\",\n              \"stage\": \"$context.stage\",\n\n              #set( $map = $input.params().header )\n              \"headers\": $loop,\n\n              #set( $map = $input.params().querystring )\n              \"query\": $loop,\n\n              #set( $map = $input.params().path )\n              \"path\": $loop,\n\n              #set( $map = $context.identity )\n              \"identity\": $loop,\n\n              #set( $map = $stageVariables )\n              \"stageVariables\": $loop\n            }\n          ",
-            "application/x-www-form-urlencoded": "\n            #define( $body )\n              {\n              #foreach( $token in $input.path('$').split('&') )\n                #set( $keyVal = $token.split('=') )\n                #set( $keyValSize = $keyVal.size() )\n                #if( $keyValSize >= 1 )\n                  #set( $key = $util.escapeJavaScript($util.urlDecode($keyVal[0])) )\n                  #if( $keyValSize >= 2 )\n                    #set( $val = $util.escapeJavaScript($util.urlDecode($keyVal[1])) )\n                  #else\n                    #set( $val = '' )\n                  #end\n                  \"$key\": \"$val\"#if($foreach.hasNext),#end\n                #end\n              #end\n              }\n            #end\n\n            #define( $loop )\n              {\n              #foreach($key in $map.keySet())\n                  \"$util.escapeJavaScript($key)\":\n                    \"$util.escapeJavaScript($map.get($key))\"\n                    #if( $foreach.hasNext ) , #end\n              #end\n              }\n            #end\n\n            {\n              \"body\": $body,\n              \"method\": \"$context.httpMethod\",\n              \"principalId\": \"$context.authorizer.principalId\",\n              \"stage\": \"$context.stage\",\n\n              #set( $map = $input.params().header )\n              \"headers\": $loop,\n\n              #set( $map = $input.params().querystring )\n              \"query\": $loop,\n\n              #set( $map = $input.params().path )\n              \"path\": $loop,\n\n              #set( $map = $context.identity )\n              \"identity\": $loop,\n\n              #set( $map = $stageVariables )\n              \"stageVariables\": $loop\n            }\n          "
-          },
-          "PassthroughBehavior": "NEVER",
-          "IntegrationResponses": [
-            {
-              "StatusCode": 200,
-              "SelectionPattern": "",
-              "ResponseParameters": {
-                "method.response.header.Content-Type": "'application/pdf'"
-              },
-              "ResponseTemplates": {}
-            },
-            {
-              "StatusCode": 400,
-              "SelectionPattern": ".*\\[400\\].*",
-              "ResponseParameters": {
-                "method.response.header.Content-Type": "'application/pdf'"
-              },
-              "ResponseTemplates": {}
-            },
-            {
-              "StatusCode": 401,
-              "SelectionPattern": ".*\\[401\\].*",
-              "ResponseParameters": {
-                "method.response.header.Content-Type": "'application/pdf'"
-              },
-              "ResponseTemplates": {}
-            },
-            {
-              "StatusCode": 403,
-              "SelectionPattern": ".*\\[403\\].*",
-              "ResponseParameters": {
-                "method.response.header.Content-Type": "'application/pdf'"
-              },
-              "ResponseTemplates": {}
-            },
-            {
-              "StatusCode": 404,
-              "SelectionPattern": ".*\\[404\\].*",
-              "ResponseParameters": {
-                "method.response.header.Content-Type": "'application/pdf'"
-              },
-              "ResponseTemplates": {}
-            },
-            {
-              "StatusCode": 422,
-              "SelectionPattern": ".*\\[422\\].*",
-              "ResponseParameters": {
-                "method.response.header.Content-Type": "'application/pdf'"
-              },
-              "ResponseTemplates": {}
-            },
-            {
-              "StatusCode": 500,
-              "SelectionPattern": ".*(Process\\s?exited\\s?before\\s?completing\\s?request|\\[500\\]).*",
-              "ResponseParameters": {
-                "method.response.header.Content-Type": "'application/pdf'"
-              },
-              "ResponseTemplates": {}
-            },
-            {
-              "StatusCode": 502,
-              "SelectionPattern": ".*\\[502\\].*",
-              "ResponseParameters": {
-                "method.response.header.Content-Type": "'application/pdf'"
-              },
-              "ResponseTemplates": {}
-            },
-            {
-              "StatusCode": 504,
-              "SelectionPattern": ".*\\[504\\].*",
-              "ResponseParameters": {
-                "method.response.header.Content-Type": "'application/pdf'"
-              },
-              "ResponseTemplates": {}
-            }
-          ]
+          }
         },
-        "ResourceId": {
-          "Ref": "ApiGatewayResourceExportGameidVar"
-        },
-        "RestApiId": {
-          "Ref": "ApiGatewayRestApi"
-        }
+        "MethodResponses": []
       }
     },
-    "ApiGatewayDeployment1479079947035": {
+    "ApiGatewayDeployment1480115565785": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -318,7 +185,42 @@
           ]
         },
         "Action": "lambda:InvokeFunction",
-        "Principal": "apigateway.amazonaws.com"
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "/*/*"
+            ]
+          ]
+        }
+      }
+    },
+    "PackageStorage": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "AccessControl": "PublicRead",
+        "BucketName": "serverless-lichess-to-pdf.dev",
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "ExpirationInDays": 1,
+              "Status": "Enabled"
+            }
+          ]
+        }
       }
     }
   },

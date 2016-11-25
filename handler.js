@@ -1,39 +1,78 @@
 'use strict';
 
-var child_process = require('child_process');
+const AWS = require('aws-sdk');
+const child_process = require('child_process');
+const stream = require('stream');
 
-module.exports.exportToPdf = (event, context) => {
-  if (!event.gameid)
+const s3 = new AWS.S3();
+
+module.exports.exportToPdf = (event, context, callback) => {
+
+  var gameid = event.pathParameters.gameid; 
+  
+  if (!gameid)
   {
-    event.gameid = "Xp9MOs3d";
-    //return context.fail("Please include the gameid.");
+      return callback(new Error(`Please include the game id in the request.`));
   }    
- 
-  var strToReturn = '';
-  //console.log("xxx child_process.spawn()");
-  var proc = child_process.spawn('./php', [ "main.php", event.gameid, { stdio: 'inherit' } ]);
-  //console.log("xxx proc.stdout.on(data)");
+
+  const key = gameid + ".pdf";
+  const bucket = 'serverless-lichess-to-pdf.dev';
+
+  var php = './php';
+  
+  // workaround to get 'sls invoke local' to work
+  if (typeof process.env.PWD !== "undefined") {
+    php = 'php';
+  }
+
+  var proc = child_process.spawn(php, [ "main.php", gameid, { stdio: 'inherit' } ]);
+
+  var phpResult = new stream.Readable();
+  phpResult._read = function noop() {};
+
   proc.stdout.on('data', function (data) {
-    //console.log("xxx --> proc.stdout.on");
-  	var dataStr = data.toString()
-    //console.log('stdout: ' + dataStr);
-    strToReturn += dataStr
+    var dataStr = data.toString('utf8');
+    phpResult.push(data);
   });
 
-  //console.log("xxx proc.stderr.on(data)");
   proc.stderr.on('data', function (data) {
-    //console.log("xxx --> proc.stderr.on");
     console.log(`stderr: ${data}`);
-    //context.fail(data)
   });
 
-  console.log("xxx proc.on('close')");
   proc.on('close', function(code) {
-    //console.log("xxx --> proc.on");
     if(code !== 0) {
-      return context.done(new Error("Process exited with non-zero status code"));
+      return callback(new Error(`Process exited with non-zero status code ${code}`));
     }
-   
-   context.succeed(strToReturn);
+    else
+    {
+      // close the stream
+      phpResult.push(null);
+
+      var body = phpResult.read();
+
+      const params = {
+        Bucket: bucket,
+        Key: key,
+        ACL: 'public-read-write',
+        Body: body,
+        ContentType: 'application/pdf'
+      };
+
+      s3.putObject(params, function(err, data) {
+        if (err)
+        {
+          return callback(new Error(`Failed to put s3 object: ${err}`));
+        }
+
+        const response = {
+          statusCode: 302,
+          headers: {
+              location : `https://s3-eu-west-1.amazonaws.com/${bucket}/${key}`
+          }
+        };
+
+        return callback(null, response);
+      });
+    }
   });
 };
