@@ -251,8 +251,9 @@ function addHeader($pdf, $game){
 	$pdf->Image('resources/images/'.$game['perf'].'.png',10,9,11);
 	$pdf->Cell(10);
     $timeControl = $game['speed'] == 'unlimited' ? 'unlimited' : (
-        $game['daysPerTurn'] ? $game['daysPerTurn'] . ' days per move' : floor($game['clock']['initial']/60) . '+' . $game['clock']['increment']
-    );
+       getOr($game, 'daysPerTurn') != null ? $game['daysPerTurn'] . ' days per move' : (
+       getOr($game, 'clock') != null ? floor($game['clock']['initial']/60) . '+' . $game['clock']['increment'] : 'unknown')
+     );
 	$pdf->Cell(120,5, utf8_decode(strtoupper(
 		$timeControl
 		. '   ' .
@@ -261,7 +262,6 @@ function addHeader($pdf, $game){
 		($game['rated']? 'rated' : 'casual')
 		)),0,2,'L');
 	$pdf->SetTextColor(0);
-	
 
 	// Date
 	$pdf->SetFont('Arial','',10);

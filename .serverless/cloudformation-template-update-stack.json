@@ -77,7 +77,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/serverless-lichess-to-pdf/dev/1480115565777-2016-11-25T23:12:45.777Z/serverless-lichess-to-pdf.zip"
+          "S3Key": "serverless/serverless-lichess-to-pdf/dev/1480674323213-2016-12-02T10:25:23.213Z/serverless-lichess-to-pdf.zip"
         },
         "FunctionName": "serverless-lichess-to-pdf-dev-exportToPdf",
         "Handler": "handler.exportToPdf",
@@ -163,7 +163,7 @@
         "MethodResponses": []
       }
     },
-    "ApiGatewayDeployment1480115565785": {
+    "ApiGatewayDeployment1480674323220": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
