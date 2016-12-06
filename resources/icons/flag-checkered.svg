@@ -1,4 +1,57 @@
-<?xml version="1.0" standalone="no"?>
-<svg width="1500px" height="1500px" version="1.1" xmlns="http://www.w3.org/2000/svg">
-<path transform="scale(1, -1) translate(0, -1500)" glyph-name="flag-checkered" unicode="&#57354;" d="M238 226l0 55c-35-3-71-14-110-33l0-53c39 18 76 29 110 31z m0 120l0 56c-33-2-70-14-110-36l0-54c41 21 78 32 110 34z m237-133l0 53c-44-22-81-29-109-20l0 64c-4 1-8 2-11 4-1 1-5 2-10 5-5 3-8 4-10 5-1 0-4 2-9 4-4 2-8 4-10 4-1 1-4 2-9 4-4 2-8 3-10 4-3 0-6 1-10 2-4 1-8 2-11 2-4 1-8 1-12 1-4 1-8 1-12 1-5 0-9 0-14-1l0-63 5 0c20 0 38-3 55-9 17-5 36-13 57-23 3-2 7-3 11-4l0-54c8-3 16-5 26-5 23 0 50 9 83 26z m0 122l0 54c-32-17-61-26-87-26-9 0-16 1-22 3l0-56c28-8 64 0 109 25z m-384 104c0-7-1-13-5-18-3-6-7-10-13-14l0-361c0-3-1-5-2-7-2-2-4-2-7-2l-18 0c-3 0-5 0-7 2-2 2-2 4-2 7l0 361c-6 4-10 8-14 14-3 5-5 11-5 18 0 10 4 19 11 26 7 7 16 10 26 10 10 0 19-3 26-10 7-7 10-16 10-26z m421-18l0-218c0-8-3-13-10-17-2-1-4-2-5-2-41-22-77-33-105-33-17 0-32 3-45 10l-8 4c-13 6-22 10-29 13-6 3-15 6-26 9-10 2-21 4-32 4-20 0-42-5-68-13-25-8-47-18-65-29-3-2-6-3-9-3-3 0-6 1-9 3-7 3-10 9-10 16l0 212c0 6 3 11 9 15 7 4 14 8 23 12 8 5 19 9 32 15 14 6 28 11 44 14 15 4 30 6 44 6 21 0 41-3 60-9 18-6 38-14 60-25 7-3 15-5 25-5 23 0 53 11 89 32 4 2 7 4 8 5 6 3 12 3 18-1 6-4 9-9 9-15z"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1500px"
+   height="1500px"
+   version="1.1"
+   id="svg8836"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="flag-checkered.svg">
+  <metadata
+     id="metadata8844">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs8842" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1280"
+     inkscape:window-height="711"
+     id="namedview8840"
+     showgrid="false"
+     inkscape:zoom="0.15733333"
+     inkscape:cx="750"
+     inkscape:cy="750"
+     inkscape:window-x="0"
+     inkscape:window-y="1"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg8836" />
+  <path
+     transform="scale(1, -1) translate(0, -1500)"
+     glyph-name="flag-checkered"
+     unicode=""
+     d="M238 226l0 55c-35-3-71-14-110-33l0-53c39 18 76 29 110 31z m0 120l0 56c-33-2-70-14-110-36l0-54c41 21 78 32 110 34z m237-133l0 53c-44-22-81-29-109-20l0 64c-4 1-8 2-11 4-1 1-5 2-10 5-5 3-8 4-10 5-1 0-4 2-9 4-4 2-8 4-10 4-1 1-4 2-9 4-4 2-8 3-10 4-3 0-6 1-10 2-4 1-8 2-11 2-4 1-8 1-12 1-4 1-8 1-12 1-5 0-9 0-14-1l0-63 5 0c20 0 38-3 55-9 17-5 36-13 57-23 3-2 7-3 11-4l0-54c8-3 16-5 26-5 23 0 50 9 83 26z m0 122l0 54c-32-17-61-26-87-26-9 0-16 1-22 3l0-56c28-8 64 0 109 25z m-384 104c0-7-1-13-5-18-3-6-7-10-13-14l0-361c0-3-1-5-2-7-2-2-4-2-7-2l-18 0c-3 0-5 0-7 2-2 2-2 4-2 7l0 361c-6 4-10 8-14 14-3 5-5 11-5 18 0 10 4 19 11 26 7 7 16 10 26 10 10 0 19-3 26-10 7-7 10-16 10-26z m421-18l0-218c0-8-3-13-10-17-2-1-4-2-5-2-41-22-77-33-105-33-17 0-32 3-45 10l-8 4c-13 6-22 10-29 13-6 3-15 6-26 9-10 2-21 4-32 4-20 0-42-5-68-13-25-8-47-18-65-29-3-2-6-3-9-3-3 0-6 1-9 3-7 3-10 9-10 16l0 212c0 6 3 11 9 15 7 4 14 8 23 12 8 5 19 9 32 15 14 6 28 11 44 14 15 4 30 6 44 6 21 0 41-3 60-9 18-6 38-14 60-25 7-3 15-5 25-5 23 0 53 11 89 32 4 2 7 4 8 5 6 3 12 3 18-1 6-4 9-9 9-15z"
+     id="path8838"
+     style="fill:#a9a9a9;fill-opacity:1" />
 </svg>
