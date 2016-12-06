@@ -1,0 +1,4 @@
+<?xml version="1.0" standalone="no"?>
+<svg width="1500px" height="1500px" version="1.1" xmlns="http://www.w3.org/2000/svg">
+<path transform="scale(1, -1) translate(0, -1500)" glyph-name="screen-full" unicode="&#61;" d="M96 128l320 0 0 256-320 0z m64 192l192 0 0-128-192 0z m-96 96l96 0 0 32-128 0 0-128 32 0z m0-224l-32 0 0-128 128 0 0 32-96 0z m288 256l0-32 96 0 0-96 32 0 0 128z m96-352l-96 0 0-32 128 0 0 128-32 0z"/>
+</svg>

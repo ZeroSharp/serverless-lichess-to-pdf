@@ -248,7 +248,10 @@ function addHeader($pdf, $game){
 	// Game Setup
 	$pdf->SetFont('Arial','',15);
 	$pdf->SetTextColor(112);
-	$pdf->Image('resources/images/'.$game['perf'].'.png',10,9,11);
+	$imageFilename = 'resources/images/'.$game['perf'].'.png';
+	if (!file_exists($imageFilename))
+	    $imageFilename = 'resources/images/classical.png';
+	$pdf->Image($imageFilename,10,9,11);
 	$pdf->Cell(10);
     $timeControl = $game['speed'] == 'unlimited' ? 'unlimited' : (
        getOr($game, 'daysPerTurn') != null ? $game['daysPerTurn'] . ' days per move' : (
