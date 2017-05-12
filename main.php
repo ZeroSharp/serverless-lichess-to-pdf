@@ -23,7 +23,7 @@ function file_get_contents_curl( $url ) {
 }
 
 function getOr($arr, $key, $def=null) {
-	return isset($arr[$key])? $arr[$key] : $def;
+	return isset($arr[$key]) ? $arr[$key] : $def;
 }
 
 function addMove($pdf, $key, $move, $next) {
@@ -143,6 +143,75 @@ function addVariation($pdf, $key, $move, $game) {
 	$pdf->Ln(4.5);
 	addMoveString($pdf, $key, $move['variation']);
 	//$pdf->Ln(6);
+}
+
+function formatCenti($duration)
+{
+    $centiseconds = ($duration % 100);
+	$seconds = floor(($duration / 100) % 60);
+	$minutes = floor(($duration / (100 * 60)) % 60);
+    $hours = floor($duration / (100 * 60 * 60));
+
+    $hoursString = ($hours < 10) ? "0".$hours : $hours;
+    $minutesString = ($hours == 0 && $minutes < 10) ? "0".$minutes : $minutes;
+    $secondsString = (($hours > 0 || $minutes > 0) && $seconds < 10) ? "0".$seconds : $seconds;
+	$centisecondsString = ($centiseconds < 10) ? "0".$centiseconds : $centiseconds;
+	$decisecondsString = floor($centiseconds / 10);
+
+    return ($hours > 0 ? $hoursString.":" : "").($minutes > 0 ? $minutesString.":" : "").$secondsString.".".$decisecondsString;
+}
+
+function median($array)
+{
+	rsort($array); 
+    $middle = round(count($array) / 2); 
+    return $array[$middle -1]; 
+}
+
+function addMoveTimesHeader($pdf, $longThresholdW, $longThresholdB) {
+	$pdf->SetDrawColor(190);
+	$pdf->SetTextColor(255);
+	$pdf->SetFont('Arial','B',7);
+	$pdf->Cell(5,5,'#','LTB',0,'L',1);
+	$pdf->Cell(10,5,'WHITE','LTB',0,'L',1);	
+	$pdf->SetFont('Arial','I',5);
+	$pdf->Cell(6,5,$longThresholdW,'TB',0,'R',1);	
+	$pdf->SetFont('Arial','B',7);
+	$pdf->Cell(10,5,'BLACK','LTB',0,'L',1);
+	$pdf->SetFont('Arial','I',5);
+	$pdf->Cell(6,5,$longThresholdB,'TBR',0,'R',1);		
+	$pdf->Ln(5);
+}
+
+function addMoveTime($pdf, $index, $moveW, $moveB, $game, $longThresholdW, $longThresholdB) {
+	$moveCentiWhite = getOr($game['players']['white']['moveCentis'], $index, 0);
+	$moveCentiBlack = getOr($game['players']['black']['moveCentis'], $index, 0);
+
+	$moveTimeWhite = formatCenti($moveCentiWhite);
+	$moveTimeBlack = formatCenti($moveCentiBlack);
+
+	$pdf->SetLineWidth(0.2);
+
+	$pdf->SetDrawColor(190);
+    $pdf->SetTextColor(255);
+	$pdf->SetFont('Arial','B',5);
+    $pdf->Cell(5,3,($index + 1).'.','LTB',0,'L',1);
+	$pdf->SetTextColor(0);
+	$pdf->SetFont('Arial','',5);
+	$pdf->Cell(8,3,$moveW,'LTB',0,'L');	
+	if ($moveTimeWhite >= 3 * $longThresholdW){
+		$pdf->SetFont('Arial','B',5);
+	}
+    $pdf->Cell(8,3,$moveTimeWhite,'TB',0,'R',$moveTimeWhite >= 2 * $longThresholdW ? 1 : 0);
+	$pdf->SetFont('Arial','',5);
+	$pdf->Cell(8,3,$moveB,'LTB',0,'L');
+	if ($moveTimeBlack >= 3 * $longThresholdB){
+		$pdf->SetFont('Arial','B',5);
+	}
+    $pdf->Cell(8,3,$moveTimeBlack,'RTB',0,'R',$moveTimeBlack >= 2 * $longThresholdB ? 1 : 0);
+	$pdf->SetFont('Arial','',5);
+
+	$pdf->Ln(3);
 }
 
 function getUsername($id) {
@@ -298,12 +367,21 @@ function addHeader($pdf, $game){
 function addFooter($pdf) {
 	$pdf->SetLeftMargin(10);
 	$pdf->SetRightMargin(10);
-	$pdf->SetXY(10,-15);
-	$pdf->SetFont('Arial','IB',8);
-	$pdf->Write(3,'Legend');
-	$pdf->SetFont('Arial','I',8);
-	$pdf->Write(3," +1.00 = 1 pawn advantage to white.  -1.00 = 1 pawn advantage to black. # 2 = White has mate in 2. # -2 = Black has mate in 2.\n");
-	$pdf->Write(3,"                Highlighted evaluations are errors in play and have notes in the Comments & Variations section.");
+	$pdf->SetXY(10,-10);
+	$pdf->SetTextColor(112);
+	$pdf->SetFont('Arial','IB',5);
+	$padding = 80;
+	$pdf->Write(2,str_repeat(' ', $padding));
+	$pdf->Write(2,'Legend');
+	$pdf->SetFont('Arial','I',5);
+	$pdf->Write(2,str_repeat(' ', 5));
+	$pdf->Write(2,"+1.00 = 1 pawn advantage to white.  -1.00 = 1 pawn advantage to black. # 2 = White has mate in 2. # -2 = Black has mate in 2.\n");
+	$padding = $padding + 18;
+	$pdf->Write(2,str_repeat(' ', $padding));
+	$pdf->Write(2,"Highlighted evaluations are errors in play - see notes in the Comments & Variations section.\n");
+	$pdf->Write(2,str_repeat(' ', $padding));
+	$pdf->Write(2,"Timings are in seconds with the median in the header. Moves double the median are highlighted. Moves triple are bold.");
+	$pdf->SetTextColor(0);
 	//$pdf->SetXY(0,-15);
 	//$pdf->Cell(0,10,'Page '.$pdf->PageNo(),0,0,'C');
 }
@@ -372,6 +450,42 @@ function addBoard($pdf, $location, $annotation, $position, $id) {
 			$pdf->Cell(45,5,$annotation,0,0,'C');
 	}
 	unlink($tmp);
+}
+
+function printMoveList($pdf, $game) {
+	foreach($game['analysis'] as $key => $move) {
+		if ($key == count($game['analysis'])-1) {
+			addMove($pdf, $key, 
+				array('move' => getOr($move, 'move'), 
+					'eval' => getOr($move, 'eval'), 
+					'mate' => getOr($move, 'mate'), 
+					'result' => formatWinShort($game)
+					),
+				null
+			);
+		} else {
+			addMove($pdf, $key, $move, getOr($game['analysis'], $key+1));
+		}
+		
+		if($key%111 == 0 && $key%222 != 0 && $key != 0) {
+			$pdf->SetXY(104,49);
+			$pdf->SetLeftMargin(104);
+		} else if ($key%223 == 0 && $key != 0) {
+			addFooter($pdf);
+			$pdf->SetLeftMargin(10);
+			$pdf->SetRightMargin(105);
+			$pdf->AddPage();
+			addHeader($pdf, $game);
+			$addBoardsPos = addBoards($pdf, $game);
+			$pdf->Cell(0,1,'',0,1);
+			$pdf->SetFillColor(190);
+			$pdf->SetTextColor(255);
+			$pdf->SetFont('Arial','B',13);
+			$pdf->Cell(95,6,'  #     WHITE   BLACK',0,0,'L',1);
+			$pdf->Cell(95,6,' #     WHITE   BLACK',0,1,'L',1);
+		}
+	}
+	$pdf->Ln(5);
 }
 
 function addBoards($pdf, $game) {
@@ -464,39 +578,8 @@ function createPDF($game) {
 	$pdf->SetTextColor(0);
 
 	if(isset($game['analysis'])) {
-		foreach($game['analysis'] as $key => $move){
-			if ($key == count($game['analysis'])-1) {
-				addMove($pdf, $key, 
-					array('move' => getOr($move, 'move'), 
-						'eval' => getOr($move, 'eval'), 
-						'mate' => getOr($move, 'mate'), 
-						'result' => formatWinShort($game)
-						),
-					null
-				);
-			} else {
-				addMove($pdf, $key, $move, getOr($game['analysis'], $key+1));
-			}
-			
-			if($key%111 == 0 && $key%222 != 0 && $key != 0) {
-				$pdf->SetXY(104,49);
-				$pdf->SetLeftMargin(104);
-			} else if ($key%223 == 0 && $key != 0) {
-				addFooter($pdf);
-				$pdf->SetLeftMargin(10);
-				$pdf->SetRightMargin(105);
-				$pdf->AddPage();
-				addHeader($pdf, $game);
-				$addBoardsPos = addBoards($pdf, $game);
-				$pdf->Cell(0,1,'',0,1);
-				$pdf->SetFillColor(190);
-				$pdf->SetTextColor(255);
-				$pdf->SetFont('Arial','B',13);
-				$pdf->Cell(95,6,'  #     WHITE   BLACK',0,0,'L',1);
-				$pdf->Cell(95,6,' #     WHITE   BLACK',0,1,'L',1);
-			}
-		}
-		$pdf->Ln(5);
+
+		printMoveList($pdf, $game);
 
 		// Determine where the cursor should be placed
 		if($pdf->GetY() < $addBoardsPos['y']) {
@@ -530,8 +613,7 @@ function createPDF($game) {
 			$pdf->SetRightMargin(10);
 		}
 		
-		$printedCom = false;
-		
+		$printedCom = false;		
 
 		if (isset($game['opening']['name'])) {
 			$pdf->SetFont('Arial','B',13);
@@ -574,6 +656,52 @@ function createPDF($game) {
 				addVariation($pdf, $key, $move, $game);
 			}
 		}
+
+        // Move times
+		if (isset($game['players']['white']['moveCentis'])) {
+									
+			$longThresholdW = median($game['players']['white']['moveCentis']) / 100;
+			$longThresholdB = median($game['players']['black']['moveCentis']) / 100;
+
+			$printedTim = false;
+            $movesForTimings = array_values($movesList);
+			$result = formatWinShort($game);
+			for ($i = 0; $i <= $game['turns'] / 2; $i++) {
+
+				$moveW = getOr($movesForTimings, $i * 2, $result);
+				$moveB = getOr($movesForTimings, $i * 2 + 1, $result);
+				
+				if ($printedTim == false) {
+					$pdf->SetFont('Arial','B',13);
+					$pdf->SetTextColor(0);
+					$pdf->Cell(30,8,'Move Times',0, 1,'L');
+
+					addMoveTimesHeader($pdf, $longThresholdW, $longThresholdB);
+
+					$printedTim = true;
+				}
+				if($pdf->GetY() > 265) {
+					if($pdf->GetX() >= 104) {
+						addFooter($pdf);
+						$pdf->SetLeftMargin(10);
+						$pdf->SetRightMargin(110);
+						$pdf->AddPage();
+						addHeader($pdf, $game);
+						$pdf->SetFont('Arial','B',13);
+						$pdf->SetTextColor(0);
+						$pdf->Cell(30,8,'Move Times', 0, 1,'L');
+						addMoveTimesHeader($pdf, $longThresholdW, $longThresholdB);
+					} else {
+						$pdf->SetXY(104,49.7);
+						$pdf->SetLeftMargin(104);
+						$pdf->SetRightMargin(10);
+						addMoveTimesHeader($pdf, $longThresholdW, $longThresholdB);
+					}
+				}
+
+				addMoveTime($pdf, $i, $moveW, $moveB, $game, $longThresholdW, $longThresholdB);
+			}
+		}
 	}
 	//output
 	addFooter($pdf);
@@ -581,9 +709,9 @@ function createPDF($game) {
 }
 
 if (isset($argv[1])) {
-	$game = json_decode(file_get_contents_curl("http://en.$domain/api/game/".$argv[1].'?with_analysis=1&with_moves=1&with_fens=1&with_opening=1'), TRUE);
+	$game = json_decode(file_get_contents_curl("http://en.$domain/api/game/".$argv[1].'?with_analysis=1&with_moves=1&with_fens=1&with_opening=1&with_movetimes=1'), TRUE);
 } else {
-	$game = json_decode(file_get_contents_curl("http://en.$domain/api/game/".$_GET['id'].'?with_analysis=1&with_moves=1&with_fens=1&with_opening=1'), TRUE);	
+	$game = json_decode(file_get_contents_curl("http://en.$domain/api/game/".$_GET['id'].'?with_analysis=1&with_moves=1&with_fens=1&with_opening=1&with_movetimes=1'), TRUE);	
 }
 //file_put_contents('php://stderr', print_r($game, TRUE));
 createPDF($game);

@@ -46,7 +46,7 @@ functions:
       - http:
           path: export/{gameid}
           method: get
-          timeout: 10
+          timeout: 15
 
 resources:
   Resources:
