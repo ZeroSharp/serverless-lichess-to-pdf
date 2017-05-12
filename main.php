@@ -172,14 +172,14 @@ function addMoveTimesHeader($pdf, $longThresholdW, $longThresholdB) {
 	$pdf->SetDrawColor(190);
 	$pdf->SetTextColor(255);
 	$pdf->SetFont('Arial','B',7);
-	$pdf->Cell(5,5,'#','LTB',0,'L',1);
+	$pdf->Cell(5,5,'#','LTB',0,'R',1);
 	$pdf->Cell(10,5,'WHITE','LTB',0,'L',1);	
-	$pdf->SetFont('Arial','I',5);
-	$pdf->Cell(6,5,$longThresholdW,'TB',0,'R',1);	
-	$pdf->SetFont('Arial','B',7);
+	$pdf->SetFont('Arial','IB',7);
+	$pdf->Cell(7,5,sprintf('%3.1f',$longThresholdW),'TB',0,'R',1);
+	$pdf->SetFont('Arial','B',7);	
 	$pdf->Cell(10,5,'BLACK','LTB',0,'L',1);
-	$pdf->SetFont('Arial','I',5);
-	$pdf->Cell(6,5,$longThresholdB,'TBR',0,'R',1);		
+	$pdf->SetFont('Arial','IB',7);
+	$pdf->Cell(7,5,sprintf('%3.1f',$longThresholdB),'TBR',0,'R',1);		
 	$pdf->Ln(5);
 }
 
@@ -194,21 +194,21 @@ function addMoveTime($pdf, $index, $moveW, $moveB, $game, $longThresholdW, $long
 
 	$pdf->SetDrawColor(190);
     $pdf->SetTextColor(255);
-	$pdf->SetFont('Arial','B',5);
-    $pdf->Cell(5,3,($index + 1).'.','LTB',0,'L',1);
+	$pdf->SetFont('Arial','B',8);
+    $pdf->Cell(5,3,($index + 1),'LTB',0,'R',1);
 	$pdf->SetTextColor(0);
 	$pdf->SetFont('Arial','',5);
-	$pdf->Cell(8,3,$moveW,'LTB',0,'L');	
+	$pdf->Cell(10,3,$moveW,'LTB',0,'L');	
 	if ($moveTimeWhite >= 3 * $longThresholdW){
 		$pdf->SetFont('Arial','B',5);
 	}
-    $pdf->Cell(8,3,$moveTimeWhite,'TB',0,'R',$moveTimeWhite >= 2 * $longThresholdW ? 1 : 0);
+    $pdf->Cell(7,3,$moveTimeWhite,'TB',0,'R',$moveTimeWhite >= 2 * $longThresholdW ? 1 : 0);
 	$pdf->SetFont('Arial','',5);
-	$pdf->Cell(8,3,$moveB,'LTB',0,'L');
+	$pdf->Cell(10,3,$moveB,'LTB',0,'L');
 	if ($moveTimeBlack >= 3 * $longThresholdB){
 		$pdf->SetFont('Arial','B',5);
 	}
-    $pdf->Cell(8,3,$moveTimeBlack,'RTB',0,'R',$moveTimeBlack >= 2 * $longThresholdB ? 1 : 0);
+    $pdf->Cell(7,3,$moveTimeBlack,'RTB',0,'R',$moveTimeBlack >= 2 * $longThresholdB ? 1 : 0);
 	$pdf->SetFont('Arial','',5);
 
 	$pdf->Ln(3);
@@ -368,7 +368,7 @@ function addFooter($pdf) {
 	$pdf->SetLeftMargin(10);
 	$pdf->SetRightMargin(10);
 	$pdf->SetXY(10,-10);
-	$pdf->SetTextColor(112);
+	$pdf->SetTextColor(0);
 	$pdf->SetFont('Arial','IB',5);
 	$padding = 80;
 	$pdf->Write(2,str_repeat(' ', $padding));
@@ -669,10 +669,11 @@ function createPDF($game) {
 			for ($i = 0; $i <= $game['turns'] / 2; $i++) {
 
 				$moveW = getOr($movesForTimings, $i * 2, $result);
-				$moveB = getOr($movesForTimings, $i * 2 + 1, $result);
+				$moveB = getOr($movesForTimings, $i * 2 + 1, $moveW != $result ? $result : '');
 				
 				if ($printedTim == false) {
 					$pdf->SetFont('Arial','B',13);
+					$pdf->SetFillColor(190);
 					$pdf->SetTextColor(0);
 					$pdf->Cell(30,8,'Move Times',0, 1,'L');
 
